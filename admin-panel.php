@@ -1,0 +1,523 @@
+<?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+session_start();
+require "db.php";
+   // connect database
+
+if (!isset($_SESSION['admin_logged_in'])) {
+    header("Location: admin-login.php");
+    exit();
+}
+
+// Count products
+$products_count = $conn->query("SELECT COUNT(*) AS total FROM products")->fetch_assoc()['total'];
+
+// Count users
+$users_count = $conn->query("SELECT COUNT(*) AS total FROM users")->fetch_assoc()['total'];
+
+// Count orders
+$orders_count = $conn->query("SELECT COUNT(*) AS total FROM orders")->fetch_assoc()['total'];
+
+$products = $conn->query("SELECT * FROM products");
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,400i,700" rel="stylesheet">
+    <link rel="stylesheet" href="./admin.css" type="text/css">
+    <title>Admin Dashboard</title>
+</head>
+<body>
+        <!-- SIDEBAR -->
+        <input type="checkbox" class="menu__checkbox" id="sideview-crawl">
+        <div class="side-view">
+            <nav class="admin-view__menu">
+                <div class="admin-view__header">
+                    <h3 class="company-name">
+                        <span>AlhurWear</span>
+                    </h3>
+                    <div class="menu-icon">
+                        <label for="sideview-crawl" class="menu-bar">
+                            <svg>
+                                <use xlink:href='./icons.svg#icon-menu'></use>
+                            </svg>
+                        </label>
+                    </div>
+                </div>
+                <div class="user-profile">
+                    <img src="./profile.jpg" alt="admin-picture">
+                    <h3 class="admin-name">
+    <span><?php echo $_SESSION['admin_name']; ?></span>
+</h3>
+
+                </div>
+                <ul class="side-nav">
+                    <li class="side-nav__active">
+                        <a href="#">
+                            <svg>
+                                <use xlink:href='./icons.svg#icon-home'></use>
+                            </svg>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li class="side-nav__products">
+                        <a href="#">
+                            <svg>
+                                <use xlink:href='./icons.svg#icon-package'></use>
+                            </svg>
+                            <span>Products</span>
+                        </a>
+                    </li>
+                    <li class="side-nav__users">
+                        <a href="#">
+                            <svg>
+                                <use xlink:href='./icons.svg#icon-user'></use>
+                            </svg>
+                            <span>Users</span>
+                        </a>
+                    </li>
+                    <li class="side-nav__orders">
+                        <a href="#">
+                            <svg>
+                                <use xlink:href='./icons.svg#icon-briefcase'></use>
+                            </svg>
+                            <span>Orders</span>
+                        </a>
+                    </li>
+                    <li class="side-nav__account">
+                        <a href="#">
+                            <svg>
+                                <use xlink:href='./icons.svg#icon-settings'></use>
+                            </svg>
+                            <span>Account</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <footer class="footer">
+                <p>&copy; AlhurWear Corporation by Rashid</p>
+            </footer>
+        </div>
+
+        <!-- MAIN --->
+        <main class="main main-content">
+            <div class="header">
+                <h1>Welcome back, AlhurWear</h1>
+                <p>Time</p>
+            </div>
+            
+            <div class="overview-cards">
+                <div class="card product-card">
+                    <div class="title">
+                        <h2>Products</h2>
+                    </div>
+                    <span class="content product-content">
+                        <svg>
+                            <use xlink:href='./icons.svg#icon-package'></use>
+                        </svg>
+                        <div class="number">
+                           <h4><?php echo $products_count; ?></h4>
+
+                        </div>
+                    </span>
+                </div>
+                <div class="card user-card">
+                    <div class="title">
+                        <h2>Users</h2>
+                    </div>
+                    <span class="content user-content">
+                        <svg>
+                            <use xlink:href='./icons.svg#icon-user'></use>
+                        </svg>
+                        <div class="number">
+                            <h4><?php echo $users_count; ?></h4>
+
+                        </div>
+                    </span>
+                </div>
+                <div class="card order-card">
+                    <div class="title">
+                        <h2>Orders</h2>
+                    </div>
+                    <span class="content order-content">
+                        <svg>
+                            <use xlink:href='./icons.svg#icon-briefcase'></use>
+                        </svg>
+                        <div class="number">
+                            <h4><?php echo $orders_count; ?></h4>
+
+                        </div>
+                    </span>
+                </div>
+            </div>
+        </main>
+
+        <!-- Product Section -->
+        <section class="product-section">
+            <div class="header">
+                <h1>Products</h1>
+            </div>
+
+            <div class="product--new">
+                <a>
+                    <button class="btn btn--new">New Product</button>
+                </a>
+            </div>
+
+            <div class="container product-container">
+                <div class="products">
+                    <div class="products-keys">
+                        <div class="keys product-id">
+                            ID
+                        </div>
+                        <div class="keys product-name">
+                            Name
+                        </div>
+                        <div class="keys product-description">
+                            Description
+                        </div>
+                        <div class="keys product-price">
+                            Price
+                        </div>
+                        <div class="keys product-image">
+                            Image
+                        </div>
+                        <div class="keys product-action_value">
+                            Action
+                        </div>
+                    </div>
+                    
+                    
+<?php
+$products = $conn->query("SELECT * FROM products");
+
+while($p = $products->fetch_assoc()):
+?>
+<div class="products-values">
+    <div class="values product-id_value"><?php echo $p['id']; ?></div>
+    <div class="values product-name_value"><?php echo $p['name']; ?></div>
+    <div class="values product-description_value"><?php echo $p['description']; ?></div>
+    <div class="values product-price_value"><?php echo $p['price']; ?></div>
+    <div class="values product-image_value">
+        <img src="<?php echo $p['image']; ?>" width="50">
+    </div>
+    <div class="values product-action_value">
+        <a href="edit-product.php?id=<?php echo $p['id']; ?>">
+            <svg><use xlink:href='./icons.svg#icon-edit'></use></svg>
+        </a>
+        <a href="delete-product.php?id=<?php echo $p['id']; ?>" onclick="return confirm('Delete this product?');">
+            <svg><use xlink:href='./icons.svg#icon-delete'></use></svg>
+        </a>
+    </div>
+</div>
+<?php endwhile; ?>
+
+
+
+
+
+
+                </div>
+            </div>
+        </section>
+
+        <!-- User Section -->
+        <section class="user-section">
+            <div class="header">
+                <h1>Users</h1>
+            </div>
+
+            <div class="user--new">
+                <a>
+                    <button class="btn btn--new">New Product</button>
+                </a>
+            </div>
+
+            <div class="container user-container">
+                <div class="users">
+                    <div class="users-keys">
+                        <div class="keys user-id">
+                            ID
+                        </div>
+                        <div class="keys user-name">
+                            Name
+                        </div>
+                        <div class="keys user-email">
+                            Email
+                        </div>
+                        <div class="keys user-password">
+                            Password
+                        </div>
+                        <div class="keys user-action_value">
+                            Action
+                        </div>
+                    </div>
+                   
+<?php
+$users = $conn->query("SELECT * FROM users");
+while($u = $users->fetch_assoc()):
+?>
+<div class="users-values">
+    <div class="values user-id_value"><?= $u['id']; ?></div>
+    <div class="values user-name_value"><?= $u['full_name']; ?></div>
+    <div class="values user-email_value"><?= $u['email']; ?></div>
+    <div class="values user-password_value">******</div>
+    <div class="values user-action_value">
+        <a href="delete-user.php?id=<?= $u['id']; ?>" onclick="return confirm('Delete this user?');">
+            <svg><use xlink:href='./icons.svg#icon-delete'></use></svg>
+        </a>
+    </div>
+</div>
+<?php endwhile; ?>
+
+
+                </div>
+            </div>
+        </section>
+
+     <!-- Order Section -->
+<section class="order-section">
+    <div class="header">
+        <h1>Orders</h1>
+    </div>
+
+    <div class="container order-container">
+        <div class="orders">
+
+            <div class="orders-keys">
+                <div class="keys order-id">ID</div>
+                <div class="keys product-name">ProductName</div>
+                <div class="keys user-name">UserName</div>
+                <div class="keys order-placedAt">PlacedAt</div>
+                <div class="keys order-price">Price</div>
+                <div class="keys order-action_value">Action</div>
+            </div>
+
+            <?php
+            $orders = $conn->query("SELECT * FROM orders ORDER BY created_at DESC");
+            while($o = $orders->fetch_assoc()):
+            ?>
+            <div class="orders-values">
+                <div class="values order-id_value"><?= $o['id']; ?></div>
+                <div class="values product-name_value"><?= $o['items']; ?></div>
+                <div class="values user-name_value"><?= $o['customer_name']; ?></div>
+                <div class="values order-placedAt_value"><?= $o['created_at']; ?></div>
+                <div class="values order-price"><?= $o['total_amount']; ?></div>
+                <div class="values order-action_value">
+                    <a href="delete-order.php?id=<?= $o['id']; ?>" onclick="return confirm('Delete this order?');">
+                        <svg><use xlink:href='./icons.svg#icon-delete'></use></svg>
+                    </a>
+                </div>
+            </div>
+            <?php endwhile; ?>
+
+        </div>
+    </div>
+</section>
+
+
+        <!-- Account Section -->
+        <section class="account-section">
+            <div class="header">
+                <h1>Account</h1>
+            </div>
+
+            <div class="account-info">
+                <div class="form-account info-name">
+                    <label>Name</label>
+                    <div class="account-field name-field"><?php echo $_SESSION['admin_name']; ?></div>
+                </div>
+                <div class="form-account info-email">
+                    <label>Email Address</label>
+                    <div class="account-field email-field"><?php echo $_SESSION['admin_email']; ?></div>
+                </div>
+                <div class="button-account">
+                    <a href="logout.php">
+    <button class="btn btn--green btn--admin">LOGOUT</button>
+</a>
+
+                </div>
+            </div>
+        </section>
+
+        <!---- NEW PRODUCT ---->
+        <section class="new--product_container">
+            <div class="new--product_header">
+                <div class="back--btn">
+                    <a>
+                        <svg>
+                            <use xlink:href='./icons.svg#icon-skip-back'></use>
+                        </svg>
+                        <span>Back</span>
+                    </a>
+                </div>
+                <div class="header">
+                    <h1>New Product</h1> 
+                </div>
+            </div>
+            
+
+            <form class="form new--productCreate__form">
+                <div class="form-new product__name">
+                    <label>Name</label>
+                    <input type="text" class="new--product_name" placeholder="Product Name" onfocus="this.placeholder= ''" onblur="this.placeholder= 'Product Name'" required>
+                </div>
+                <div class="form-new product__keyword">
+                    <label>Keyword</label>
+                    <input type="text" class="new--product_keyword" placeholder="Product Keyword" onfocus="this.placeholder= ''" onblur="this.placeholder= 'Product Keyword'" required>
+                </div>
+                <div class="form-new product__brand">
+                    <label>Brand</label>
+                    <input type="text" class="new--product_brand" placeholder="Product Brand" onfocus="this.placeholder= ''" onblur="this.placeholder= 'Product Brand'" required>
+                </div>
+                <div class="form-new product__description">
+                    <label>Description</label>
+                    <textarea class="new--product_description" rows="10" cols="40" placeholder="Product Description" onfocus="this.placeholder= ''" onblur="this.placeholder= 'Product Description'" required></textarea>
+                </div>
+                <div class="form-new product__price">
+                    <label>Price</label>
+                    <input type="text" class="new--product_price" placeholder="Product Price" onfocus="this.placeholder= ''" onblur="this.placeholder= 'Product Price'" required>
+                </div>
+                <div class="form-new product__image">
+                    <label>Image</label>
+                    <input type="text" class="new--product_image" placeholder="Product Image" onfocus="this.placeholder= ''" onblur="this.placeholder= 'Product Image'" required>
+                </div>
+                <div class="new--product_create">
+                    <button class="btn btn--create">Create</button>
+                </div>
+            </form>
+        </section>
+
+        <!---- UPDATE PRODUCT ---->
+        <section class="update--product_container">
+            <div class="update--product_header">
+                <div class="back--btn">
+                    <a>
+                        <svg>
+                            <use xlink:href='./icons.svg#icon-skip-back'></use>
+                        </svg>
+                        <span>Back</span>
+                    </a>
+                </div>
+                <div class="header">
+                    <h1>Update Product</h1> 
+                </div>
+            </div>
+            
+
+            <form class="form update--product__form">
+                <div class="form-update product__name">
+                    <label>Name</label>
+                    <input type="text" class="new--product_name" placeholder="Product Name" onfocus="this.placeholder= ''" onblur="this.placeholder= 'Product Name'" required>
+                </div>
+                <div class="form-update product__keyword">
+                    <label>Keyword</label>
+                    <input type="text" class="new--product_keyword" placeholder="Product Keyword" onfocus="this.placeholder= ''" onblur="this.placeholder= 'Product Keyword'" required>
+                </div>
+                <div class="form-update product__brand">
+                    <label>Brand</label>
+                    <input type="text" class="new--product_brand" placeholder="Product Brand" onfocus="this.placeholder= ''" onblur="this.placeholder= 'Product Brand'" required>
+                </div>
+                <div class="form-update product__description">
+                    <label>Description</label>
+                    <textarea class="new--product_description" rows="10" cols="40" placeholder="Product Description" onfocus="this.placeholder= ''" onblur="this.placeholder= 'Product Description'" required></textarea>
+                </div>
+                <div class="form-update product__price">
+                    <label>Price</label>
+                    <input type="text" class="new--product_price" placeholder="Product Price" onfocus="this.placeholder= ''" onblur="this.placeholder= 'Product Price'" required>
+                </div>
+                <div class="form-update product__image">
+                    <label>Image</label>
+                    <input type="text" class="new--product_image" placeholder="Product Image" onfocus="this.placeholder= ''" onblur="this.placeholder= 'Product Image'" required>
+                </div>
+                <div class="update--product">
+                    <button class="btn btn--update">Update</button>
+                </div>
+            </form>
+        </section>
+
+        <!---- NEW USER ---->
+        <section class="new--user_container">
+            <div class="new--user_header">
+                <div class="back--btn">
+                    <a>
+                        <svg>
+                            <use xlink:href='./icons.svg#icon-skip-back'></use>
+                        </svg>
+                        <span>Back</span>
+                    </a>
+                </div>
+                <div class="header">
+                    <h1>New User</h1> 
+                </div>
+            </div>
+            
+
+            <form class="form new--UserCreate__form">
+                <div class="form-new user__name">
+                    <label>Name</label>
+                    <input type="text" class="new--user_name" placeholder="User Name" onfocus="this.placeholder= ''" onblur="this.placeholder= 'User Name'" required>
+                </div>
+                <div class="form-new user__email">
+                    <label>Email</label>
+                    <input type="text" class="new--user_email" placeholder="User Email" onfocus="this.placeholder= ''" onblur="this.placeholder= 'User Email'" required>
+                </div>
+                <div class="form-new user__password">
+                    <label>Password</label>
+                    <input type="password" class="new--user_password" placeholder="********" onfocus="this.placeholder= ''" onblur="this.placeholder= '********'" minlength='8' required>
+                </div>
+                <div class="form-new user__password-confirm">
+                    <label>Password Confirm</label>
+                    <input type="password" class="new--user_password-confirm" placeholder="********" onfocus="this.placeholder= ''" onblur="this.placeholder= '********'" minlength='8' required>
+                </div>
+                <div class="new--user_create">
+                    <button class="btn btn--create">Create</button>
+                </div>
+            </form>
+        </section>
+
+        <!------ UPDATE USER ----->
+        <section class="update--user_container">
+            <div class="update--user_header">
+                <div class="back--btn">
+                    <a>
+                        <svg>
+                            <use xlink:href='./icons.svg#icon-skip-back'></use>
+                        </svg>
+                        <span>Back</span>
+                    </a>
+                </div>
+                <div class="header">
+                    <h1>Update User</h1> 
+                </div>
+            </div>
+            
+
+            <form class="form update--user_form">
+                <div class="form-update user__name">
+                    <label>Name</label>
+                    <input type="text" class="update--user_name" placeholder="User Name" onfocus="this.placeholder= ''" onblur="this.placeholder= 'User Name'" required>
+                </div>
+                <div class="form-update user__email">
+                    <label>Email</label>
+                    <input type="text" class="update--user_email" placeholder="User Email" onfocus="this.placeholder= ''" onblur="this.placeholder= 'User Email'" required>
+                </div>
+                <div class="form-update user__password">
+                    <label>Password</label>
+                    <input type="password" class="update--user_password" placeholder="********" onfocus="this.placeholder= ''" onblur="this.placeholder= '********'" minlength='8' required>
+                </div>
+                <div class="update--user">
+                    <button class="btn btn--update">Update</button>
+                </div>
+            </form>
+        </section>
+        
+        <script src="admin.js"></script>
+</body>
+</html>
